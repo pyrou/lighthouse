@@ -1,15 +1,15 @@
 <?xml version="1.0"?>
 <!-- TODO get to errorLevel 1 - the most strict -->
 <psalm
-    errorLevel="7"
+    errorLevel="6"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns="https://getpsalm.org/schema/config"
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
 >
     <projectFiles>
-        <directory name="src" />
+        <directory name="src"/>
         <ignoreFiles>
-            <directory name="vendor" />
+            <directory name="vendor"/>
         </ignoreFiles>
     </projectFiles>
 
@@ -20,5 +20,24 @@
                 <referencedClass name="Illuminate\Testing\TestResponse"/>
             </errorLevel>
         </UndefinedDocblockClass>
+
+        <!-- Psalm does not know about Collection being templated -->
+        <TooManyTemplateParams>
+            <errorLevel type="suppress">
+                <directory name="src"/>
+            </errorLevel>
+        </TooManyTemplateParams>
+
+        <UndefinedPropertyAssignment>
+            <errorLevel type="suppress">
+                <referencedProperty name="GraphQL\Type\Definition\ResolveInfo::$argumentSet"/>
+            </errorLevel>
+        </UndefinedPropertyAssignment>
+
+        <UndefinedPropertyFetch>
+            <errorLevel type="suppress">
+                <referencedProperty name="GraphQL\Type\Definition\ResolveInfo::$argumentSet"/>
+            </errorLevel>
+        </UndefinedPropertyFetch>
     </issueHandlers>
 </psalm>

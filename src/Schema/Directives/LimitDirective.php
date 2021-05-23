@@ -71,7 +71,7 @@ GRAPHQL;
                 return $result;
             }
 
-            $limited = [];
+            $limited = collect();
 
             foreach ($result as $value) {
                 if ($limit === 0) {

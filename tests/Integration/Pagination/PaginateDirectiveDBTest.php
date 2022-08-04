@@ -595,6 +595,108 @@ GRAPHQL;
         });
     }
 
+    public function testQueriesConnectionPageOffset(): void
+    {
+        $users = factory(User::class, 3)->create();
+
+        $this->schema = /** @lang GraphQL */ '
+        type User {
+            id: ID!
+        }
+
+        type Query {
+            users: [User!]! @paginate(type: CONNECTION)
+        }
+        ';
+
+        $this->assertQueryCountMatches(2, function () use ($users): void {
+            $this->graphQL(/** @lang GraphQL */ '
+            {
+                users(first: 2, after: "Mg==") {
+                    pageInfo {
+                      hasNextPage
+                      hasPreviousPage
+                      startCursor
+                      endCursor
+                      total
+                      count
+                      currentPage
+                      lastPage
+                    }
+                    edges {
+                        node {
+                            id
+                        }
+                    }
+                }
+            }
+            ')->dump()->assertJson([
+                'data' => [
+                    'users' => [
+                        'pageInfo' => [
+                            'hasNextPage' => false,
+                            'hasPreviousPage' => true,
+                            'startCursor' => 'Mw==',
+                            'endCursor' => 'Mw==',
+                            'total' => 3,
+                            'count' => 1,
+                            'currentPage' => 2,
+                            'lastPage' => 2,
+                        ],
+                        'edges' => [
+                            [
+                                'node' => [
+                                    'id' => $users[2]->id,
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ])->assertJsonCount(1, 'data.users.edges');
+        });
+    }
+
+    public function testQueriesConnectionPageOffsetWithoutPageInfo(): void
+    {
+        $users = factory(User::class, 3)->create();
+
+        $this->schema = /** @lang GraphQL */ '
+        type User {
+            id: ID!
+        }
+
+        type Query {
+            users: [User!]! @paginate(type: CONNECTION)
+        }
+        ';
+
+        $this->assertQueryCountMatches(1, function () use ($users): void {
+            $this->graphQL(/** @lang GraphQL */ '
+            {
+                users(first: 2, after: "Mg==") {
+                    edges {
+                        node {
+                            id
+                        }
+                    }
+                }
+            }
+            ')->assertJson([
+                'data' => [
+                    'users' => [
+                        'edges' => [
+                            [
+                                'node' => [
+                                    'id' => $users[2]->id,
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ])->assertJsonCount(1, 'data.users.edges');
+        });
+    }
+
     public function testPaginatesWhenDefinedInTypeExtension(): void
     {
         factory(User::class, 2)->create();
